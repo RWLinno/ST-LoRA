@@ -1,6 +1,7 @@
 # ST-LoRA
 
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**. [arXiv](https://arxiv.org/abs/2404.07919)
+**<font color='red'>[Highlight]</font> This code is the version as of March 14, 2024, and the updated code will be released upon acceptance of the paper.**
 
 ## 🔗Citing  ST-LoRA
 (🌟It's very important for me~~~)
@@ -95,14 +96,12 @@ python main.py --device=cuda:1 --dataset=PEMS04 --years=2018 --mode=train
 python main.py --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24 --num_mlrfs=4 
 ```
 
-
-
-### Fine-tuning
-
+### Fine-tuning using LoRA
+Stay tuned for the latest repo/experiments
 
 
 ### 📈 Visualization
-
+Stay tuned for the latest repo/tutorials
 
 
 ## Acknowledgements
