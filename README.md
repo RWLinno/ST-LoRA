@@ -1,6 +1,6 @@
 # ST-LoRA
 
-This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**. [arXiv](https://arxiv.org/abs/2404.07919)
+This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
 **<font color='red'>[Highlight]</font> This code is the version as of March 14, 2024, and the updated code will be released upon acceptance of the paper.**
 
 ## 🔗Citing  ST-LoRA
