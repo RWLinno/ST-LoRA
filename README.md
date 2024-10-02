@@ -66,11 +66,11 @@ It is also recommended that you train with the following commands and modifiable
 
 ```
 python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
-# using python main.py to train orginal models
+# using python main.py to train original models
 # You need to modify the backbone model in the `main.py` header file
 ```
 
-##### Comparison with MLP (using)
+##### Comparison with MLP
 
 ```
 python main.py --stlora --mlp
@@ -98,5 +98,8 @@ Stay tuned for the latest repo/tutorials
 
 
 ## Acknowledgements
+The acknowledgment will be hidden during the paper review phase！
+<div style="display:none">
 I would like to sincerely thank **Prof. Yuxuan Liang** and the [Citymind](https://citymind.top/about-us/) Group from The Hong Kong University of Science and Technology (Guangzhou) for their valuable support and guidance throughout the ST-LoRA project. Their contributions were instrumental to the success of this work.
+<\div>
 
