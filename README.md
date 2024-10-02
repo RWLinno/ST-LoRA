@@ -8,15 +8,7 @@ This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Sp
 (🌟It's very important for me~~~)
 
 If you find this resource helpful, please consider to star this repository and cite our research:
-```
-@article{ruan2024low,
-  title={Low-rank Adaptation for Spatio-Temporal Forecasting},
-  author={Ruan, Weilin and Chen, Wei and Dang, Xilin and Zhou, Jianxiang and Li, Weichuang and Liu, Xu and Liang, Yuxuan},
-  journal={arXiv preprint arXiv:2404.07919},
-  year={2024}
-}
-```
-
+**<font color='red'>[Highlight]</font>Information in this place has been blocked during the paper review phase.**
 
 ## 💿Requirements
 
