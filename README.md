@@ -3,12 +3,12 @@
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
 
 **<font color='red'>[Highlight]</font> This code is the version as of March 14, 2024, and the updated code will be released upon acceptance of the paper.**
+**<font color='red'>Part of the information will be hidden during the review phase.</font>**
 
 ## 🔗Citing  ST-LoRA
 (🌟It's very important for me~~~)
 
 If you find this resource helpful, please consider to star this repository and cite our research:
-**<font color='red'>[Highlight]</font>Information in this place has been blocked during the paper review phase.**
 
 ## 💿Requirements
 
@@ -98,8 +98,5 @@ Stay tuned for the latest repo/tutorials
 
 
 ## Acknowledgements
-The acknowledgment will be hidden during the paper review phase！
-<div style="display:none">
-I would like to sincerely thank **Prof. Yuxuan Liang** and the [Citymind](https://citymind.top/about-us/) Group from The Hong Kong University of Science and Technology (Guangzhou) for their valuable support and guidance throughout the ST-LoRA project. Their contributions were instrumental to the success of this work.
-<\div>
+The acknowledgment will be hidden during the paper review phase  
 
