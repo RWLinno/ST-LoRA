@@ -12,15 +12,15 @@ If you find this resource helpful, please consider to star this repository and c
 
 ## 💿Requirements
 
----
-
 - python >= 3.7
 
 - torch==1.13.1
 
-Other dependencies can be installed using the following command:
+All dependencies can be installed using the following command:
 
 ```
+conda create -n stlora python==3.7
+conda activate stlora
 pip install -r requirements.txt
 ```
 
@@ -35,16 +35,12 @@ pip install -r requirements.txt
 
 ## 📦Dataset
 
-### Download Data
+You can download datasets used in the paper via this link: [Google Drive](https://drive.google.com/drive/folders/1vtfAlMufZJxzoLsdJXFasE39pfc1Xcqn?usp=sharing)
+or use `./download_datasets.sh` to download datasets.
 
-- You can download datasets used in the paper via this link: [Google Drive](https://drive.google.com/drive/folders/1vtfAlMufZJxzoLsdJXFasE39pfc1Xcqn?usp=sharing)
 
 
-### Experiments
-
-We conduct experiments on 
-
-##### Quick Start
+## ⭐Quick Start
 
 ```
 python main.py [-dataset] [-device] [-pre_train] [-seed] [-epochs] ...
