@@ -27,6 +27,7 @@ pip install -r requirements.txt
 ## 📚repo structure
 
 -  main.py
+- data
 - generate_training_data -> refer to 'Graph-WaveNet'
   - rawdata.h5 -> year_dataset/(his.npz, idx_test.npy, idx_train.npywe4, idx_val.npy)
 - experiments -> expr. log
