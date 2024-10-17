@@ -79,10 +79,10 @@ class GCN(nn.Module):
         return h
 
 
-class Linear_Adapter(nn.Module):
+class Node_Specific_Predictor(nn.Module):
     def __init__(self, input_dim, output_dim, horizon, hidden_dim, num_layers, supports,
                  lora_r=8, lora_alpha=16, lora_dropout=0.3,linear=False,lagcn=False):
-        super(Linear_Adapter, self).__init__()
+        super(Node_Specific_Predictor, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.horizon = horizon
@@ -147,11 +147,11 @@ class Linear_Adapter(nn.Module):
 
         return output
 
-class LAST(nn.Module):
+class STLoRA(nn.Module):
     def __init__(self, device, node_num,input_dim, output_dim, horizon, model, supports,
                  frozen=False, lagcn=False, embed_dim=12, num_layers=4, num_blocks=1,
                  la_dropout=0.3, last_lr=1e-4,last_weight_decay=1e-5, last_pool_type='absmin'):
-        super(LAST, self).__init__()
+        super(STLoRA, self).__init__()
         self.device = device
         self.num_node = node_num
         self.input_dim = input_dim
@@ -172,11 +172,10 @@ class LAST(nn.Module):
                     value.requires_grad_(requires_grad=False)
 
         self.embed_dim = embed_dim
-        self.adapter = nn.ModuleList()        
-        #self.gconv = nn.ModuleList()
+        self.predictor = nn.ModuleList()        
         self.bn = nn.ModuleList()
         for _ in range(num_blocks):
-            self.adapter.append(Linear_Adapter( input_dim=self.output_dim,
+            self.predictor.append(Node_Specific_Predictor( input_dim=self.output_dim,
                                                 output_dim=self.output_dim,
                                                 horizon = self.horizon,
                                                 hidden_dim=self.output_dim * self.embed_dim,
@@ -200,7 +199,7 @@ class LAST(nn.Module):
         output = self.pre_model(x,iter)         
         tunings = []
         for i in range(self.num_blocks):
-            tmp =  output * F.softmax(F.leaky_relu(self.adapter[i](output)[:, :, :, -self.output_dim:]),dim=-1)
+            tmp =  output * F.softmax(F.leaky_relu(self.predictor[i](output)[:, :, :, -self.output_dim:]),dim=-1)
             tunings.append(tmp)
         tuning_stack = torch.stack(tunings, dim=0)
         
@@ -227,15 +226,12 @@ class LAST(nn.Module):
     def backward(self, loss):
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)  # 添加梯度裁剪
-            # 检查梯度裁剪后的梯度是否过大
         total_norm = 0
         for p in self.parameters():
             param_norm = p.grad.data.norm(2)
             total_norm += param_norm.item() ** 2
         total_norm = total_norm ** (1. / 2)
-
-        if total_norm > 1.0:  # 如果梯度过大，降低学习率
+        if total_norm > 1.0:
             self.scheduler.step(total_norm)
-        
         self.optimizer.step()
         self.optimizer.zero_grad()

@@ -60,7 +60,7 @@ def get_public_config():
     parser.add_argument('--clip_grad_value', type=int, default=5)
     parser.add_argument('--adj_type', type=str, default='doubletransition')
 
-    parser.add_argument('--adapter', action='store_true')
+    parser.add_argument('--stlora', action='store_true')
     parser.add_argument('--frozen', action='store_true')
     parser.add_argument('--nor_adj', action='store_true')
     parser.add_argument('--lagcn', action='store_true')

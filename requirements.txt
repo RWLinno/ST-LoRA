@@ -6,3 +6,6 @@ scikit_learn
 scipy
 torch
 torch_geometric
+torchdiffeq
+fastdtw
+gdown

@@ -26,8 +26,8 @@ def main():
     args.dataloader, args.scaler = load_dataset(args.data_path, args)
     engine = get_engine(args)
 
-    if args.adapter:
-        engine.model = LAST(device=args.device,
+    if args.stlora:
+        engine.model = STLoRA(device=args.device,
                                 node_num=args.node_num,
                                 input_dim=args.input_dim,
                                 output_dim=args.output_dim,
