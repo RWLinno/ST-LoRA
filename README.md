@@ -3,7 +3,7 @@
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
 
 **<font color='red'>[Highlight]</font> This code is the version as of March 14, 2024, and the updated code will be released upon acceptance of the paper.**
-**<font color='red'>Part of the information will be hidden during the review phase.</font>**
+**<font color='red'>Part of the information will be hidden during the review phase. The latest source code will be released when the paper is accepted.</font>**
 
 ## 🔗Citing  ST-LoRA
 (🌟It's very important for me~~~)
