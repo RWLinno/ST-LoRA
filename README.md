@@ -67,13 +67,6 @@ python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
 # You need to modify the backbone model in the `main.py` header file
 ```
 
-##### Comparison with MLP
-
-```
-python main.py --stlora --mlp
-```
-
-
 
 ### 🎯Training from scratch
 
