@@ -13,3 +13,7 @@ gdown
 ipdb
 wandb
 urllib3==1.26.15
+torchdiffeq
+ipdb
+wandb
+torchinfo
