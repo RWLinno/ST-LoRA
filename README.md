@@ -1,8 +1,7 @@
 # ST-LoRA
-
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
 
-**<font color='red'>[Highlight]</font> This code is the version as of March 14, 2024, and the updated code will be released upon acceptance of the paper.**
+**<font color='red'>[Highlight]</font> The updated code will be released with more baselines and modules upon acceptance of the paper.**
 **<font color='red'>Part of the information will be hidden during the review phase. The latest source code will be released when the paper is accepted.</font>**
 
 ## 🔗Citing  ST-LoRA
@@ -13,14 +12,13 @@ If you find this resource helpful, please consider to star this repository and c
 ## 💿Requirements
 
 - python >= 3.7
-
 - torch==1.13.1
 
 All dependencies can be installed using the following command:
-
 ```
 conda create -n stlora python==3.7
 conda activate stlora
+pip install torch==1.13.1 torch_geometric torchinfo
 pip install -r requirements.txt
 ```
 
@@ -35,11 +33,21 @@ pip install -r requirements.txt
 - src -> source code for stlora
 
 ## 📦Dataset
+Our experiments utilize six public traffic datasets: PEMS03, PEMS04, PEMS07, PEMS08, METR-LA, and PEMS-BAY.
+You can download these datasets via:
+- **Option 1**: [Google Drive](https://drive.google.com/drive/folders/1vtfAlMufZJxzoLsdJXFasE39pfc1Xcqn?usp=sharing)
+- **Option 2**: Run `./download_datasets.sh`
 
-You can download datasets used in the paper via this link: [Google Drive](https://drive.google.com/drive/folders/1vtfAlMufZJxzoLsdJXFasE39pfc1Xcqn?usp=sharing)
-or use `./download_datasets.sh` to download datasets.
+##### Dataset Statistics
 
-
+| Dataset | #Nodes | #Frames | Time Range |
+|---------|--------|---------|------------|
+| METR-LA | 207 | 34,272 | 03/2012 – 06/2012 |
+| PEMS-BAY | 325 | 52,116 | 01/2017 – 06/2017 |
+| PEMS03 | 358 | 26,208 | 09/2018 – 11/2018 |
+| PEMS04 | 307 | 16,992 | 01/2018 – 02/2018 |
+| PEMS07 | 883 | 28,224 | 05/2017 – 08/2017 |
+| PEMS08 | 170 | 17,856 | 07/2016 – 08/2016 |
 
 ## ⭐Quick Start
 
@@ -77,16 +85,29 @@ python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
 python main.py --device=cuda:1 --dataset=PEMS04 --years=2018 --mode=train
 # use st-lora for adjustment
 python main.py --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24 --num_mlrfs=4 
+
+# Enhance STGCN
+python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+
+# Enhance Graph WaveNet
+python main.py --device=cuda:0 --dataset=PEMS03 --years=2018 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+
+# Enhance AGCRN
+python main.py --device=cuda:0 --dataset=PEMS07 --years=2017 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+
+# Enhance STID
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
 ```
 
-### Fine-tuning using LoRA
+### 🧪 Fine-tuning using LoRA
 Stay tuned for the latest repo/experiments
+Our experiments show significant improvements across multiple metrics (MAE, RMSE, MAPE) when applying ST-LoRA to backbone models. For detailed results, please refer to our paper.
 
 
 ### 📈 Visualization
-Stay tuned for the latest repo/tutorials
+Stay tuned for additional visualization examples in the `tutorials/` directory.
 
 
-## Acknowledgements
+## 🙏 Acknowledgements
 The acknowledgment will be hidden during the paper review phase  
 
