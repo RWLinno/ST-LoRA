@@ -86,22 +86,23 @@ python main.py --device=cuda:1 --dataset=PEMS04 --years=2018 --mode=train
 # use st-lora for adjustment
 python main.py --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24 --num_mlrfs=4 
 
-# Enhance STGCN
-python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+# Enhance STGCN / GWN / AGCRN / STID, please Uncomment in main.py
+python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --mode=train --stlora --num_nalls=4 --embed_dim=24
 
-# Enhance Graph WaveNet
-python main.py --device=cuda:0 --dataset=PEMS03 --years=2018 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+python main.py --device=cuda:0 --dataset=PEMS03 --years=2018 --mode=train --stlora --num_nalls=4 --embed_dim=24
 
-# Enhance AGCRN
-python main.py --device=cuda:0 --dataset=PEMS07 --years=2017 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+python main.py --device=cuda:0 --dataset=PEMS07 --years=2017 --mode=train --stlora --num_nalls=4 --embed_dim=24
 
-# Enhance STID
-python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --num_nalls=4 --embed_dim=24
 ```
 
 ### 🧪 Fine-tuning using LoRA
 Stay tuned for the latest repo/experiments
 Our experiments show significant improvements across multiple metrics (MAE, RMSE, MAPE) when applying ST-LoRA to backbone models. For detailed results, please refer to our paper.
+```
+# please Uncomment and give model_name at the same time
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --num_nalls=4 --embed_dim=24 --pre_train --load_pretrain_path='best.pt' --model_name=AGCRN
+```
 
 
 ### 📈 Visualization
