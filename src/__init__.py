@@ -1,17 +1,21 @@
 import random
 import torch
+import numpy as np
 from .base.engine import *
 from .model import *
 from .models.__init__ import *
 from .engines.__init__ import *
 from .utils.__init__ import *
-from fastdtw import fastdtw
+try:
+    from fastdtw import fastdtw  # optional dependency for DTW-based SE matrix
+except Exception:  # pragma: no cover - optional
+    fastdtw = None
 import os
 
 my_name = 'rwlinno'
 its_name = 'GWN-LoRA'
 
-# 手动设置随机种子
+# Set random seed deterministically across libraries
 def init_seed(seed):
     torch.cuda.cudnn_enabled = False
     torch.backends.cudnn.benchmark = False 
@@ -23,7 +27,7 @@ def init_seed(seed):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-# 打印可学习参数率
+# Print trainable parameter statistics
 def print_trainable_parameters(model):
     trainable_params = 0
     all_param = 0
@@ -108,6 +112,34 @@ def get_engine(args,**kwargs):
                     horizon=args.horizon
                     )
         
+        optimizer = torch.optim.Adam(model.parameters(), lr=args.lrate, weight_decay=args.wdecay)
+        scheduler = None
+        engine = BaseEngine(device=args.device,
+                            model=model,
+                            dataloader=args.dataloader,
+                            scaler=args.scaler,
+                            sampler=None,
+                            loss_fn=args.loss_fn,
+                            lrate=args.lrate,
+                            optimizer=optimizer,
+                            scheduler=scheduler,
+                            clip_grad_value=args.clip_grad_value,
+                            max_epochs=args.max_epochs,
+                            patience=args.patience,
+                            log_dir=args.log_dir,
+                            logger=args.logger,
+                            seed=args.seed
+                            )
+    elif args.model == 'mlp':
+        model = MLP(node_num=args.node_num,
+                    input_dim=args.input_dim,
+                    output_dim=args.output_dim,
+                    seq_len=args.seq_length,
+                    horizon=args.horizon,
+                    hidden_dim=args.hidden_dim,
+                    num_layers=args.num_layers,
+                    dropout=args.dropout)
+
         optimizer = torch.optim.Adam(model.parameters(), lr=args.lrate, weight_decay=args.wdecay)
         scheduler = None
         engine = BaseEngine(device=args.device,

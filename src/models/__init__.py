@@ -10,3 +10,5 @@ from .lstm import *
 from .stgcn import *
 from .stgode import *
 from .staeformer import *
+from .mlp import *
+from .moving_avg import *

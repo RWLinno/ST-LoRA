@@ -107,41 +107,7 @@ class StandardScaler2():
         return (data * self.std) + self.mean
 
 def load_dataset(data_path, args):
-    # 额外处理 air_tiny 数据集
-    # if args.dataset == 'AirTiny':
-    #     # https://github.com/yoshall/AirFormer/blob/main/src/utils/helper.py
-    #     args.logger.info('Data shape: ' + str(ptr['data'].shape))
-    #     dataloader = {}
-    #     for cat in ['train', 'val', 'test']:
-    #         idx = np.load(os.path.join(args.data_path+'/'+args.years +'/'+ category + '.npz'))
-    #         dataloader['x_' + cat] = cat_data['x']
-    #         dataloader['y_' + cat] = cat_data['y']
-
-    #     scalers = []
-    #     for i in range(args.output_dim):
-    #         scalers.append(StandardScaler2(mean=data['x_train'][..., i].mean(),std=data['x_train'][..., i].std()))
-
-    #     # Data format
-    #     for category in ['train', 'val', 'test']:
-    #         # normalize the target series (generally, one kind of series)
-    #         for i in range(args.output_dim):
-    #             data['x_' + category][..., i] = scalers[i].transform(data['x_' + category][..., i])
-    #             data['y_' + category][..., i] = scalers[i].transform(data['y_' + category][..., i])
-
-    #         new_x = Tensor(data['x_' + category])
-    #         new_y = Tensor(data['y_' + category])
-    #         processed[category] = TensorDataset(new_x, new_y)
-
-    #     results['train_loader'] = DL(processed['train'], args.batch_size)
-    #     results['val_loader'] = DL(processed['val'], args.batch_size)
-    #     results['test_loader'] = DL(processed['test'], args.batch_size)
-
-    #     print('train: {}\t valid: {}\t test:{}'.format(len(results['train_loader'].dataset),
-    #                                                 len(results['val_loader'].dataset),
-    #                                                 len(results['test_loader'].dataset)))
-    #     scaler = StandardScaler(mean=data['x_train'].mean(), std=data['x_train'].std())
-    #     results['scaler'] = scaler
-    #     return results, scaler
+    # Optional handling for AirTiny dataset is intentionally omitted here
 
     ptr = np.load(os.path.join(data_path, args.years, 'his.npz'))
     args.logger.info('Data shape: ' + str(ptr['data'].shape))

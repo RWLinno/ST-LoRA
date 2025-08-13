@@ -202,7 +202,7 @@ class BaseEngine():
             log = 'Average Test MAE: {:.4f}, Test RMSE: {:.4f}, Test MAPE: {:.4f}'
             self._logger.info(log.format(np.mean(test_mae), np.mean(test_rmse), np.mean(test_mape)))
 
-            # 方便记录结果
+            # Write summarized results for downstream tracking
             results_name = "results"+str(self._seed)+".csv"
             with open(results_name, 'w', newline='') as csvfile:
                 fieldnames = ['MAE3', 'RMSE3', 'MAPE3','MAE6', 'RMSE6', 'MAPE6','MAE12', 'RMSE12', 'MAPE12','MAEa', 'RMSEa', 'MAPEa']

@@ -26,6 +26,21 @@ def main():
     args.dataloader, args.scaler = load_dataset(args.data_path, args)
     engine = get_engine(args)
 
+    # Optionally apply LoRA directly to backbone layers for broader coverage
+    if args.backbone_lora:
+        include = set([s for s in args.lora_include.split(',') if s]) if hasattr(args, 'lora_include') else None
+        exclude = set([s for s in args.lora_exclude.split(',') if s]) if hasattr(args, 'lora_exclude') else None
+        from src.loralib.inject import apply_lora_to_module
+        engine.model = apply_lora_to_module(
+            engine.model,
+            r=args.lora_r,
+            lora_alpha=args.lora_alpha,
+            lora_dropout=args.lora_dropout,
+            include_names=include,
+            exclude_names=exclude,
+        )
+        engine.model.to(engine._device)
+
     if args.stlora:
         engine.model = STLoRA(device=args.device,
                                 node_num=args.node_num,
@@ -42,9 +57,13 @@ def main():
                                 la_dropout=args.last_dropout,
                                 last_lr=args.last_lr,
                                 last_weight_decay=args.last_weight_decay,
-                                last_pool_type=args.last_pool_type
+                                last_pool_type=args.last_pool_type,
+                                linear=args.linear
                                 )
         engine.model.to(engine._device)
+        # If we wrapped with STLoRA, prefer using its internal optimizer for fine-tuning adapters
+        engine._optimizer = engine.model.optimizer
+        engine._lr_scheduler = engine.model.scheduler
 
     if args.pre_train:
         pretrained_dict = torch.load('./save/'+args.pre_train, map_location=device)
@@ -71,7 +90,6 @@ def main():
 
     print_trainable_parameters(engine.model)
     print(args.model,args.mode," finished!! thank you!!")
-    os.system('start wb.mp3')
     end_time = time.time()
     print("total run time: {} s".format(end_time - start_time))
     print("total train time: {} s".format(end_time - train_time))

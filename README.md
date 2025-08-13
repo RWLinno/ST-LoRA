@@ -1,14 +1,6 @@
 # ST-LoRA
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
 
-**<font color='red'>[Highlight]</font> The updated code will be released with more baselines and modules upon acceptance of the paper.**
-**<font color='red'>Part of the information will be hidden during the review phase. The latest source code will be released when the paper is accepted.</font>**
-
-## 🔗Citing  ST-LoRA
-(🌟It's very important for me~~~)
-
-If you find this resource helpful, please consider to star this repository and cite our research:
-
 ## 💿Requirements
 
 - python >= 3.7
@@ -55,7 +47,7 @@ You can download these datasets via:
 python main.py [-dataset] [-device] [-pre_train] [-seed] [-epochs] ...
 ```
 
-Examples for all parameters in commands. You can modify some of the default parameters in `./src/utils/args.py`  contained:
+Examples for all parameters in commands. You can modify some of the default parameters in `./src/utils/args.py`:
 
 ```
 --seed=998244353 
@@ -70,8 +62,11 @@ Examples for all parameters in commands. You can modify some of the default para
 It is also recommended that you train with the following commands and modifiable parameters:
 
 ```
-python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
+
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --model=gwnet --mode=train
 # using python main.py to train original models
+
+python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
 # You need to modify the backbone model in the `main.py` header file
 ```
 
@@ -81,34 +76,78 @@ python main.py --device=cuda:1 --dataset=PEMS08 --years=2016 --stlora
 ##### run PEMS03/PEMS04/PEMS07/PEMS08 be like:
 
 ```
-# original model
-python main.py --device=cuda:1 --dataset=PEMS04 --years=2018 --mode=train
-# use st-lora for adjustment
-python main.py --mode=train --stlora --mlp --num_nalls=4 --embed_dim=24 --num_mlrfs=4 
+# Train STGNN baselines from scratch (choose one backbone with --model)
+# Supported: gwnet, stgcn, agcrn, dcrnn, astgcn, d2stgnn, dstagnn, stae, mlp
+python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --model=gwnet --mode=train
+python main.py --device=cuda:0 --dataset=PEMS03 --years=2018 --model=stgcn --mode=train
+python main.py --device=cuda:0 --dataset=PEMS07 --years=2017 --model=agcrn --mode=train
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --model=dcrnn --mode=train
 
-# Enhance STGCN / GWN / AGCRN / STID, please Uncomment in main.py
-python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --mode=train --stlora --num_nalls=4 --embed_dim=24
-
-python main.py --device=cuda:0 --dataset=PEMS03 --years=2018 --mode=train --stlora --num_nalls=4 --embed_dim=24
-
-python main.py --device=cuda:0 --dataset=PEMS07 --years=2017 --mode=train --stlora --num_nalls=4 --embed_dim=24
-
-python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --num_nalls=4 --embed_dim=24
+# A fast non-graph baseline
+python main.py --device=cuda:0 --dataset=METRLA --years=2012 --mode=train --mlp
 ```
 
-### 🧪 Fine-tuning using LoRA
-Stay tuned for the latest repo/experiments
-Our experiments show significant improvements across multiple metrics (MAE, RMSE, MAPE) when applying ST-LoRA to backbone models. For detailed results, please refer to our paper.
+### 🧪 Fine-tuning and Enhancement with ST-LoRA 
+
+- ST-LoRA wraps any backbone and adds node-adaptive low-rank predictors (few extra params, node-specific adjustment). For details, see our paper.
+- You can optionally inject LoRA directly into backbone layers before wrapping with ST-LoRA.
+
+Basic usage (wrap backbone with ST-LoRA):
 ```
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --model=gwnet --mode=train \
+  --stlora --num_nalls=4 --embed_dim=24
+```
+
+Freeze backbone and only train adapters (parameter-efficient fine-tuning):
+```
+python main.py --device=cuda:0 --dataset=METRLA --years=2012 --model=dcrnn --mode=train \
+  --stlora --frozen --num_nalls=4 --embed_dim=24
+```
+
+Inject LoRA into backbone modules (Linear/Conv) with include/exclude filters:
+```
+python main.py --device=cuda:0 --dataset=PEMS04 --years=2018 --model=stgcn --mode=train \
+  --backbone_lora --lora_r=8 --lora_alpha=16 --lora_dropout=0.1 \
+  --lora_include=proj,ffn --lora_exclude=bn,layernorm
+```
+
+Combine both (backbone STGNNs + ST-LoRA):
+```
+python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --model=gwnet --mode=train \
+  --backbone_lora --stlora --num_nalls=4 --embed_dim=24
+
 # please Uncomment and give model_name at the same time
 python main.py --device=cuda:0 --dataset=PEMS08 --years=2016 --mode=train --stlora --num_nalls=4 --embed_dim=24 --pre_train --load_pretrain_path='best.pt' --model_name=AGCRN
 ```
+
+Optional ST-LoRA flags: `--linear` (use linear adapters inside node predictor), `--num_lablocks` (stacked predictors), `--last_pool_type` (mean/min/max/absmin/weighted).
 
 
 ### 📈 Visualization
 Stay tuned for additional visualization examples in the `tutorials/` directory.
 
 
-## 🙏 Acknowledgements
-The acknowledgment will be hidden during the paper review phase  
+## 🔧 What the Modules Do and Why They Are Efficient
 
+- ST-LoRA Wrapper (`src/model.py::STLoRA`):
+  - Adds lightweight, node-adaptive low-rank predictors on top of any backbone output; supports residual fusion via multiple blocks and pooling strategies.
+  - Efficient: typically ~1% extra parameters while improving performance (e.g., ~7% in our study) by explicitly modeling node-level heterogeneity.
+- Node-Specific Predictor and NALL:
+  - Uses low-rank linear adapters (NALL) or standard linear layers (`--linear`) across horizons, plus dropout/BN/LeakyReLU for stability.
+  - Works as a small per-node function approximator over backbone outputs, enabling personalized adjustments.
+- General LoRA Injection (`src/loralib/inject.py`):
+  - One-line injection of LoRA into Linear/Conv layers across any backbone, with include/exclude filters for precise control.
+  - Efficient: freeze backbone weights, train only LoRA factors; reduces memory and compute while keeping strong performance.
+
+These modules are complementary: LoRA brings parameter-efficient tuning inside layers; ST-LoRA adds node-level personalization on outputs. Combined, they deliver high gains with low overhead.
+
+## 🔗Citing  ST-LoRA
+If you find this resource helpful, please consider to star this repository and cite our research:
+```
+@article{ruan2024low,
+  title={Low-rank adaptation for spatio-temporal forecasting},
+  author={Ruan, Weilin and Chen, Wei and Dang, Xilin and Zhou, Jianxiang and Li, Weichuang and Liu, Xu and Liang, Yuxuan},
+  journal={arXiv preprint arXiv:2404.07919},
+  year={2024}
+}
+```

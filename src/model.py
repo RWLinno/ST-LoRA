@@ -30,8 +30,8 @@ class NALL(nn.Linear):
 
     def forward(self, x: torch.Tensor):
         result = F.linear(x, self.weight, bias=self.bias)            
-        result += (self.lora_dropout(x) @ self.lora_A.transpose(0, 1) @ self.lora_B.transpose(0, 1)) \
-                    * self.scaling  / (self.ranknum+1e-5)
+        # Stable scaling without dividing by a train-time rank counter
+        result += (self.lora_dropout(x) @ self.lora_A.transpose(0, 1) @ self.lora_B.transpose(0, 1)) * self.scaling
         return result
 
 # def replace_layer_with_lora(module):
@@ -150,7 +150,8 @@ class Node_Specific_Predictor(nn.Module):
 class STLoRA(nn.Module):
     def __init__(self, device, node_num,input_dim, output_dim, horizon, model, supports,
                  frozen=False, lagcn=False, embed_dim=12, num_layers=4, num_blocks=1,
-                 la_dropout=0.3, last_lr=1e-4,last_weight_decay=1e-5, last_pool_type='absmin'):
+                 la_dropout=0.3, last_lr=1e-4,last_weight_decay=1e-5, last_pool_type='absmin',
+                 linear=False):
         super(STLoRA, self).__init__()
         self.device = device
         self.num_node = node_num
@@ -164,7 +165,7 @@ class STLoRA(nn.Module):
         self.dropout = nn.Dropout(la_dropout)
         self.lr = last_lr # 2e-4 default -> 1e-3
         self.weight_decay = last_weight_decay #5e-5 default -> 1e-4
-        self.linear = False
+        self.linear = linear
         self.lagcn = lagcn
         self.pool_type = last_pool_type
         if frozen:
@@ -181,8 +182,8 @@ class STLoRA(nn.Module):
                                                 hidden_dim=self.output_dim * self.embed_dim,
                                                 num_layers=self.num_layers,
                                                 supports=self.supports,
-                                                lora_dropout=la_dropout,
-                                                linear = self.linear,
+                                                 lora_dropout=la_dropout,
+                                                 linear = self.linear,
                                                 lagcn=lagcn)
                     )
             self.bn.append(nn.BatchNorm1d(self.output_dim))
@@ -195,15 +196,26 @@ class STLoRA(nn.Module):
 
     def forward(self, x, label=None, iter=None):
         B,T,N,D = x.shape
-        # output = self.pre_model(x,label,iter) #dcrnn
-        output = self.pre_model(x,iter)         
+        # Support different backbone signatures
+        try:
+            output = self.pre_model(x, label, iter)
+        except TypeError:
+            try:
+                output = self.pre_model(x, label)
+            except TypeError:
+                try:
+                    output = self.pre_model(x, iter)
+                except TypeError:
+                    output = self.pre_model(x)
         tunings = []
         for i in range(self.num_blocks):
-            tmp =  output * F.softmax(F.leaky_relu(self.predictor[i](output)[:, :, :, -self.output_dim:]),dim=-1)
+#            tmp =  output * F.softmax(F.leaky_relu(self.predictor[i](output)[:, :, :, -self.output_dim:]),dim=-1)
+            gate = torch.sigmoid(self.predictor[i](output)[:, :, :, -self.output_dim:])
+            tmp = output * gate
             tunings.append(tmp)
         tuning_stack = torch.stack(tunings, dim=0)
         
-        if not self.pool_type in ['mean', 'min', 'max', 'absmin']:
+        if not self.pool_type in ['mean', 'min', 'max', 'absmin', 'weighted']:
             self.pool_type = random.choice(['mean', 'min', 'max'])
         if self.pool_type == 'mean':
             output = output + torch.mean(tuning_stack, dim=0) 
@@ -216,6 +228,11 @@ class STLoRA(nn.Module):
             closest_to_zero_index = torch.argmin(abs_values, dim=0)
             closest_to_zero_values = torch.take(tuning_stack, closest_to_zero_index)
             output = output + closest_to_zero_values
+        elif self.pool_type == 'weighted':
+            # learnable convex weights across blocks
+            weights = torch.softmax(torch.randn(self.num_blocks, device=output.device), dim=0)
+            w = weights.view(self.num_blocks, 1, 1, 1, 1)
+            output = output + torch.sum(w * tuning_stack, dim=0)
         
         if self.lagcn: 
             output += F.softmax(F.relu(self.gconv(x, self.supports)[:,-self.horizon:,:,-self.output_dim:]), dim=-1)
@@ -225,7 +242,7 @@ class STLoRA(nn.Module):
 
     def backward(self, loss):
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)  # 添加梯度裁剪
+        torch.nn.utils.clip_grad_norm_(self.parameters(), max_norm=1.0)  # gradient clipping for stability
         total_norm = 0
         for p in self.parameters():
             param_norm = p.grad.data.norm(2)

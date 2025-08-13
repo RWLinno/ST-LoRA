@@ -27,6 +27,9 @@ def get_logger(log_dir, name, log_filename, level=logging.INFO):
 def get_config():
     parser = get_public_config()
     args = parser.parse_args()
+    # allow selecting a lightweight MLP backbone via flag
+    if hasattr(args, 'mlp') and args.mlp:
+        args.model = 'mlp'
     addition = get_model_args(args.model)
     for key, value in addition.items():
         setattr(args, key, value)
@@ -74,6 +77,14 @@ def get_public_config():
     parser.add_argument('--last_lr', type=float, default=1e-3)
     parser.add_argument('--last_weight_decay', type=float, default=1e-4)
     parser.add_argument('--last_pool_type', type=str, default="mean")
+    parser.add_argument('--mlp', action='store_true')
+    # generalized LoRA injection over backbones
+    parser.add_argument('--backbone_lora', action='store_true')
+    parser.add_argument('--lora_r', type=int, default=8)
+    parser.add_argument('--lora_alpha', type=int, default=16)
+    parser.add_argument('--lora_dropout', type=float, default=0.1)
+    parser.add_argument('--lora_include', type=str, default="")
+    parser.add_argument('--lora_exclude', type=str, default="bn,layernorm,batchnorm")
 
     return parser
 
@@ -164,5 +175,11 @@ def get_model_args(model_name):
             'd_model': 512,
             'd_k': 32,
             'n_head': 3
+        }
+    elif model_name == 'mlp':
+        model_args = {
+            'hidden_dim': 128,
+            'num_layers': 2,
+            'dropout': 0.1
         }
     return model_args
