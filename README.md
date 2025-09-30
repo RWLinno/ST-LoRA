@@ -1,5 +1,6 @@
 # ST-LoRA
 This code is a PyTorch implementation of our paper **"Low-rank Adaptation for Spatio-Temporal Forecasting"**.
+🎉 Update (May 2025): This paper has been accepted by <ECML-PKDD2025>! You can check it out [here](https://ecmlpkdd-storage.s3.eu-central-1.amazonaws.com/preprints/2025/research/preprint_ecml_pkdd_2025_research_120.pdf). 🔥🔥🔥
 
 ## 💿Requirements
 
@@ -151,3 +152,4 @@ If you find this resource helpful, please consider to star this repository and c
   year={2024}
 }
 ```
+
